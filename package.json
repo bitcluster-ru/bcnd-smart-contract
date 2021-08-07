@@ -1,0 +1,28 @@
+{
+  "name": "bcnd-smart-contract",
+  "version": "1.0.0",
+  "description": "BitCluster Nord Token",
+  "keywords": [],
+  "author": "BitCluster",
+  "license": "UNLICENSED",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test"
+  },
+  "devDependencies": {
+    "@chainlink/contracts": "^0.2.1",
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.4",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/contracts": "^4.2.0",
+    "@types/node": "^16.4.1",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.4.2",
+    "hardhat": "^2.5.0",
+    "hardhat-gas-reporter": "^1.0.4",
+    "solidity-coverage": "^0.7.16",
+    "ts-node": "^10.1.0"
+  },
+  "dependencies": {}
+}
