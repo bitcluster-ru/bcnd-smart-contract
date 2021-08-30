@@ -34,8 +34,7 @@ contract BitClusterNordToken is ERC20PresetOwnablePausable("BitCluster Nord", "B
      * funds that may be accidentally sent to this contract.
      */
     function withdrawAnyERC20Token(address tokenAddress, address to, uint amount) external onlyOwner nonReentrant {
-        IERC20 anyToken = IERC20(tokenAddress);
-        anyToken.safeTransfer(to, amount);
+        IERC20(tokenAddress).safeTransfer(to, amount);
     }
 
 }

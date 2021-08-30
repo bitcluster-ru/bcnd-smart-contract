@@ -4,7 +4,6 @@ pragma solidity ^0.8.4;
 import "./BitClusterNordToken.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
@@ -13,16 +12,16 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 contract BitClusterNordCrowdsale is Ownable, Pausable, ReentrancyGuard {
 
     using SafeERC20 for IERC20Metadata;
-    using SafeERC20 for IERC20;
+    using SafeERC20 for BitClusterNordToken;
 
     // token being sold
-    BitClusterNordToken public token;
+    BitClusterNordToken public immutable token;
 
     // investments are only allowed before endTime timestamp
-    uint public endTime;
+    uint public immutable endTime;
 
     // how many tokens a buyer gets per USD
-    uint public rate;
+    uint public immutable rate;
 
     /**
      * Token purchase event.
@@ -34,9 +33,9 @@ contract BitClusterNordCrowdsale is Ownable, Pausable, ReentrancyGuard {
     // funds collected from the crowdsale are transferred to this wallet
     address payable private outputWallet;
     // ETH/USD exchange rate feed address
-    AggregatorV3Interface private ethUsdExchangeRateFeed;
+    AggregatorV3Interface private immutable ethUsdExchangeRateFeed;
     // USDT token address (or alternative test token on testnets)
-    IERC20Metadata private usdt;
+    IERC20Metadata private immutable usdt;
 
     constructor(
         BitClusterNordToken _token,
@@ -57,7 +56,7 @@ contract BitClusterNordCrowdsale is Ownable, Pausable, ReentrancyGuard {
     /**
      * Amount of tokens remaining to be sold.
      */
-    function remainingSupply() public view returns (uint) {
+    function remainingSupply() external view returns (uint) {
         return token.balanceOf(address(this));
     }
 
@@ -79,13 +78,14 @@ contract BitClusterNordCrowdsale is Ownable, Pausable, ReentrancyGuard {
         ) = ethUsdExchangeRateFeed.latestRoundData();
 
         // calculate purchased token amount
-        uint tokenAmount = msg.value * uint(ethUsdExchangeRate) / (10**ethUsdExchangeRateFeed.decimals()) * rate;
+        uint tokenAmount = msg.value * uint(ethUsdExchangeRate) * rate / (10**ethUsdExchangeRateFeed.decimals());
 
         validatePurchase(tokenAmount);
 
         deliverTokens(msg.sender, tokenAmount);
 
-        outputWallet.transfer(msg.value);
+        (bool sent,) = outputWallet.call { value: msg.value }("");
+        require(sent, "BCND: failed to send ETH");
     }
 
     /**
@@ -119,7 +119,7 @@ contract BitClusterNordCrowdsale is Ownable, Pausable, ReentrancyGuard {
      * Deliver tokens to the purchaser.
      */
     function deliverTokens(address purchaser, uint tokenAmount) internal {
-        token.transfer(purchaser, tokenAmount);
+        token.safeTransfer(purchaser, tokenAmount);
         emit TokenPurchase(purchaser, tokenAmount);
     }
 
@@ -137,7 +137,7 @@ contract BitClusterNordCrowdsale is Ownable, Pausable, ReentrancyGuard {
      * Pauses all token purchases.
      * See {ERC20Pausable} and {Pausable-_pause}.
      */
-    function pause() public virtual onlyOwner whenNotPaused {
+    function pause() external virtual onlyOwner whenNotPaused {
         _pause();
     }
 
@@ -145,7 +145,7 @@ contract BitClusterNordCrowdsale is Ownable, Pausable, ReentrancyGuard {
      * Unpauses all token purchases.
      * See {ERC20Pausable} and {Pausable-_unpause}.
      */
-    function unpause() public virtual onlyOwner whenPaused {
+    function unpause() external virtual onlyOwner whenPaused {
         _unpause();
     }
 
@@ -153,8 +153,7 @@ contract BitClusterNordCrowdsale is Ownable, Pausable, ReentrancyGuard {
      * This function is needed to allow withdrawal of ERC20 funds that may be accidentally sent to this contract.
      */
     function withdrawAnyERC20Token(address tokenAddress, address to, uint amount) external onlyOwner nonReentrant {
-        IERC20 anyToken = IERC20(tokenAddress);
-        anyToken.safeTransfer(to, amount);
+        IERC20Metadata(tokenAddress).safeTransfer(to, amount);
     }
 
 }

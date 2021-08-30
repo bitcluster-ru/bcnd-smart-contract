@@ -5,10 +5,6 @@
   "keywords": [],
   "author": "BitCluster",
   "license": "UNLICENSED",
-  "main": "index.js",
-  "scripts": {
-    "test": "npx hardhat test"
-  },
   "devDependencies": {
     "@chainlink/contracts": "^0.2.1",
     "@nomiclabs/hardhat-ethers": "^2.0.2",

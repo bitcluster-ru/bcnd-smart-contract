@@ -26,7 +26,7 @@ contract ERC20PresetOwnablePausable is Context, Ownable, ERC20Burnable, ERC20Pau
      * Creates `amount` new tokens for `to`.
      * See {ERC20-_mint}.
      */
-    function mint(address to, uint256 amount) public virtual onlyOwner {
+    function mint(address to, uint256 amount) external virtual onlyOwner {
         _mint(to, amount);
     }
 
@@ -34,7 +34,7 @@ contract ERC20PresetOwnablePausable is Context, Ownable, ERC20Burnable, ERC20Pau
      * Pauses all token transfers.
      * See {ERC20Pausable} and {Pausable-_pause}.
      */
-    function pause() public virtual onlyOwner whenNotPaused {
+    function pause() external virtual onlyOwner whenNotPaused {
         _pause();
     }
 
@@ -42,7 +42,7 @@ contract ERC20PresetOwnablePausable is Context, Ownable, ERC20Burnable, ERC20Pau
      * Unpauses all token transfers.
      * See {ERC20Pausable} and {Pausable-_unpause}.
      */
-    function unpause() public virtual onlyOwner whenPaused {
+    function unpause() external virtual onlyOwner whenPaused {
         _unpause();
     }
 
